@@ -629,7 +629,7 @@ void AC_WPNav::update_wpnav()
 ///     converts desired position held in _target vector to desired velocity
 void AC_WPNav::get_loiter_position_to_velocity(float dt, float max_speed_cms)
 {
-    Vector3f curr = _inav->get_position();	// ST-JD: in cm from base position
+    Vector3f curr = _inav->get_position();
     float dist_error_total;
 
     float vel_sqrt;
@@ -747,9 +747,10 @@ void AC_WPNav::reset_I()
 {
     _pid_pos_lon->reset_I();
     _pid_pos_lat->reset_I();
-    _pid_rate_lon->reset_I();
-    _pid_rate_lat->reset_I();
-
+    if (init_I){      // ST_JD : init rate pid's I term to 0 for loiter mode only, not for hybrid
+        _pid_rate_lon->reset_I();
+        _pid_rate_lat->reset_I();
+    }
     // set last velocity to current velocity
     _vel_last = _inav->get_velocity();
 }

@@ -1627,8 +1627,8 @@ bool set_roll_pitch_mode(uint8_t new_roll_pitch_mode)
 			if( ap.home_is_set ) 
 			{		
 				K_brake=(15.0f*(float)wp_nav._brake_rate+95.0f)/100.0f;
-                hybrid_mode_roll=1;				// Loiter start
-				hybrid_mode_pitch=1;			// Loiter start
+                hybrid_mode_roll=3;				// Loiter start
+				hybrid_mode_pitch=3;			// Loiter start
                 wind_comp_x=wind_comp_y=0;      // Init wind_comp (ef). For now, resetted each time hybrid is switched on
                 wind_offset_roll=0;             // Init offset angles
 				wind_offset_pitch=0;
@@ -2188,12 +2188,12 @@ void update_throttle_mode(void)
                     set_throttle_out(0, false);
                     // deactivate accel based throttle controller (it will be automatically re-enabled when alt-hold controller next runs)
                     throttle_accel_deactivate();
-					/*
+					
 					if (ap.CH7_flag!=0) {
 						// ST-JD - reset the inav altitude to baro measure to avoid "rocket start" if take_off after land without reboot
 						inertial_nav.set_altitude(barometer.get_altitude()*100);  //or rather use baro_alt = read_barometer() but where is the read_barometer function?
 					}
-					*/
+					
                 }
             }
             // check land_complete flag again in case it was changed above
