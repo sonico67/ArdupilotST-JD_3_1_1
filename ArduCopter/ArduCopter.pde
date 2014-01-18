@@ -1624,18 +1624,20 @@ bool set_roll_pitch_mode(uint8_t new_roll_pitch_mode)
             roll_pitch_initialised = true;
             break;
 		case ROLL_PITCH_HYBRID:         // ST-JD : Hybrid mode
-			if( ap.home_is_set ) 
-			{		
 				K_brake=(15.0f*(float)wp_nav._brake_rate+95.0f)/100.0f;
-                hybrid_mode_roll=3;				// Loiter start
-				hybrid_mode_pitch=3;			// Loiter start
+                if (ap.land_complete) {
+                    hybrid_mode_roll=3;				// Loiter start
+                    hybrid_mode_pitch=3;			// Loiter start
+                }else{
+                    hybrid_mode_roll=1;				// Alt_hold like to avoid hard twitch if hybrid enabled in flight
+                    hybrid_mode_pitch=1;			//               
+                }
                 wind_comp_x=wind_comp_y=0;      // Init wind_comp (ef). For now, resetted each time hybrid is switched on
                 wind_offset_roll=0;             // Init offset angles
 				wind_offset_pitch=0;
                 update_wind_offset_timer=0;     // Init wind offset computation timer          
 				loiter_stab_timer=LOITER_STAB_TIMER;
-				roll_pitch_initialised = true;	// require gps lock
-			}
+				roll_pitch_initialised = true;
             break;
 #if AUTOTUNE == ENABLED
         case ROLL_PITCH_AUTOTUNE:
@@ -2152,7 +2154,17 @@ void update_throttle_mode(void)
             set_throttle_out(0, false); // no need for angle boost with zero throttle
         }else{
             pilot_throttle_scaled = get_pilot_desired_throttle(g.rc_3.control_in);
-            set_throttle_out(pilot_throttle_scaled, true);
+            // Throttle assist try out
+            if(ap.CH7_flag!=0){ // I've not used param, just enable with CH7 to give a try
+                // Grab inertial velocity
+                Vector3f vel = inertial_nav.get_velocity();
+                float myGain = 1.0 - ((float)abs(pilot_throttle_scaled - 500) / 200.0);
+                myGain = max(myGain, 0) * -2; // 2 is the gain
+                set_throttle_out(pilot_throttle_scaled + (vel.z * myGain), true);
+            }else{
+                set_throttle_out(pilot_throttle_scaled, true);
+            }
+            //set_throttle_out(pilot_throttle_scaled, true);
 
             // update estimate of throttle cruise
             #if FRAME_CONFIG == HELI_FRAME
