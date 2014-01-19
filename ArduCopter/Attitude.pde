@@ -1207,7 +1207,7 @@ static bool update_land_detector()
                 land_detector = 0;
             }
         }
-    }else{
+    }else if (g.rc_3.control_in != 0 || failsafe.radio){ // ST-JD : added condition throttle stick not null to avoid disarm bug
         // we've sensed movement up or down so reset land_detector
         land_detector = 0;
         if(ap.land_complete) {
